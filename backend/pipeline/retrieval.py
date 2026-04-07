@@ -20,6 +20,31 @@ class RetrievalPipeline:
         self.vector_store = vector_store
         logger.info(f"Retrieval pipeline using model: {self.model}")
 
+    def run_stream(self, query: str, history: List[Dict] = None, top_k: int = 5):
+        """Execute the retrieval pipeline with status streaming."""
+        import json
+        
+        yield json.dumps({"status": "Vectorizing your query..."}) + "\n"
+        query_vec = embedding_model.generate(query)
+        if not query_vec:
+            yield json.dumps({"error": "Failed to generate query embeddings."}) + "\n"
+            return
+            
+        yield json.dumps({"status": "Searching vector database for relevant context..."}) + "\n"
+        results = self.vector_store.search(query_vec, top_k=top_k)
+        
+        if not results:
+            yield json.dumps({"status": "No relevant documents found. Generating response..."}) + "\n"
+        else:
+            yield json.dumps({"status": f"Found {len(results)} relevant segments. Synthesizing answer..."}) + "\n"
+
+        # Generate the final answer
+        try:
+            answer_data = self.generate_answer(query, results)
+            yield json.dumps(answer_data) + "\n"
+        except Exception as e:
+            yield json.dumps({"error": f"Generation failed: {str(e)}"}) + "\n"
+
     def run(self, query: str, top_k: int = 5) -> Dict:
         """Execute the retrieval pipeline."""
         
@@ -73,6 +98,11 @@ class RetrievalPipeline:
         except Exception as e:
             logger.error(f"LLM call failed: {e}")
             return {"answer": "Sorry, something went wrong while generating the answer. Please try again.", "citations": []}
+
+def retrieve_and_generate_answer_stream(query: str, vector_store, api_key: str, history: List[Dict] = None, top_k: int = 5):
+    """Helper for streaming retrieval and generation."""
+    pipeline = RetrievalPipeline(api_key=api_key, vector_store=vector_store)
+    return pipeline.run_stream(query, history=history, top_k=top_k)
 
 def retrieve_and_generate_answer(query: str, vector_store, api_key: str, top_k: int = 5) -> Dict:
     """Helper function to execute the retrieval and generation pipeline."""

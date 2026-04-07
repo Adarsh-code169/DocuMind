@@ -55,40 +55,36 @@ app.add_middleware(
 )
 
 
+from fastapi.responses import StreamingResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
+from pipeline.ingestion import process_and_store_document_stream
+from pipeline.retrieval import retrieve_and_generate_answer_stream
+
+app.mount("/static", StaticFiles(directory=os.path.join(os.path.dirname(__file__), "static")), name="static")
+
 @app.post("/upload")
 async def upload_document(file: UploadFile = File(...)):
-    """Upload a PDF, extract and chunk text, generate embeddings, and store in ChromaDB."""
     if not file.filename.endswith(".pdf"):
         raise HTTPException(status_code=400, detail="Only PDF files supported")
-
     content = await file.read()
-    if len(content) > MAX_FILE_SIZE:
-        raise HTTPException(status_code=400, detail="File too large (max 50MB)")
+    return StreamingResponse(process_and_store_document_stream(content, file.filename, vector_store), media_type="text/event-stream")
 
-    logger.info(f"Upload: '{file.filename}' ({len(content) / 1024:.1f} KB)")
-
-    try:
-        num_chunks = process_and_store_document(content, file.filename, vector_store)
-        return {"message": f"Processed {num_chunks} chunks from {file.filename}", "chunks": num_chunks}
-    except Exception as e:
-        logger.error(f"Error processing file: {e}")
-        raise HTTPException(status_code=500, detail="Failed to process and store document")
-
-
-@app.post("/chat", response_model=ChatResponse)
+@app.post("/chat")
 async def chat(request: ChatRequest):
-    """Process user query, retrieve relevant documents, and generate a cited response."""
-    try:
-        response = retrieval_pipeline.run(request.message, top_k=5)
-        return response
-    except Exception as e:
-        logger.error(f"Chat error: {e}")
-        raise HTTPException(status_code=400, detail="Couldn't process your query. Check that GROQ_API_KEY is valid and documents are uploaded.")
+    groq_key = os.getenv("GROQ_API_KEY")
+    return StreamingResponse(retrieve_and_generate_answer_stream(request.message, vector_store, groq_key), media_type="text/event-stream")
 
+@app.get("/")
+async def read_index():
+    return FileResponse(os.path.join(os.path.dirname(__file__), "static/index.html"))
 
 @app.get("/health")
 def health():
     return {"status": "ok", "vector_store": "chromadb"}
+
+@app.get("/status")
+async def status():
+    return {"status": "online", "vector_store": "ready" if vector_store else "initializing"}
 
 if __name__ == "__main__":
     import uvicorn
