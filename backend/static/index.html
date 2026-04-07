@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Intelligent Research Assistant</title>
+    <title>DocuMind Knowledge Engine</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts: Inter -->
@@ -160,7 +160,7 @@
 
             const initialMessage = {
                 role: 'assistant',
-                content: "Hello! I'm your Intelligent Research Assistant. Upload a PDF and ask me anything about it."
+                content: "Hello! I'm the DocuMind Knowledge Engine. Upload a document to build context, and ask me anything about it."
             };
 
             useEffect(() => {
@@ -335,7 +335,7 @@
                     <main className="flex-1 flex flex-col relative">
                         {/* Header */}
                         <header className="h-16 flex items-center justify-between px-8 bg-white/50 backdrop-blur-md border-b border-green-100">
-                            <h2 className="text-lg font-semibold text-gray-800">Intelligent Research Assistant</h2>
+                            <h2 className="text-lg font-semibold text-gray-800">DocuMind Knowledge Engine</h2>
                             <div className="flex gap-4">
                                 <button className="p-2 text-gray-500 hover:text-green-600 transition-all" onClick={() => setIsShareOpen(true)} title="Share Chat"><i data-lucide="share" className="w-5 h-5"></i></button>
                                 <button className="p-2 text-gray-500 hover:text-green-600 transition-all" onClick={() => setIsSettingsOpen(true)} title="Settings"><i data-lucide="settings" className="w-5 h-5"></i></button>
@@ -429,7 +429,7 @@
                                     </div>
                                 </div>
                                 <div className="text-center mt-3 text-[10px] text-gray-400">
-                                    Intelligent Research Assistant can make mistakes. Verify important information.
+                                    DocuMind AI can make mistakes. Verify important information.
                                 </div>
                             </div>
                         </div>
