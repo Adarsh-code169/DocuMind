@@ -1,7 +1,13 @@
 #!/bin/bash
 
-# Start FastAPI and Streamlit
-echo "Starting FastAPI on port ${PORT:-8000} and Streamlit on 8501..."
-PORT=${PORT:-8000}
-uvicorn backend.main:app --host 0.0.0.0 --port $PORT &
-streamlit run frontend/app.py --server.port 8501 --server.address 0.0.0.0
+# Port cleanup logic
+function cleanup() {
+    echo "Stopping existing services..."
+    lsof -ti:8000 | xargs kill -9 2>/dev/null
+}
+
+# Start Unified Service (FastAPI + React SPA)
+cleanup
+echo "Starting Intelligent Research Assistant on http://0.0.0.0:8000"
+source venv/bin/activate
+cd backend && uvicorn main:app --host 0.0.0.0 --port 8000
