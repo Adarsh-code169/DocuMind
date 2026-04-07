@@ -3,15 +3,18 @@ import logging
 from pypdf import PdfReader
 from typing import List, Dict
 
+# Use the existing embeddings model wrapper
+from embeddings import embedding_model
+
 logger = logging.getLogger(__name__)
 
-# chunk params — 500 chars with 50 overlap works well for MiniLM embeddings
+# Configure chunking for the text data
 CHUNK_SIZE = 500
 CHUNK_OVERLAP = 50
 
 
 def extract_text_from_pdf(file_content: bytes, filename: str) -> List[Dict]:
-    """Extract text from each page of a PDF file."""
+    """Extract page text from a PDF file."""
     reader = PdfReader(io.BytesIO(file_content))
     pages = []
 
@@ -31,7 +34,7 @@ def extract_text_from_pdf(file_content: bytes, filename: str) -> List[Dict]:
 
 
 def chunk_text(pages: List[Dict], chunk_size: int = CHUNK_SIZE, overlap: int = CHUNK_OVERLAP) -> List[Dict]:
-    """Split page text into overlapping chunks for better retrieval."""
+    """Chunk text documents into overlapping segments."""
     chunks = []
     chunk_id = 0
 
@@ -39,7 +42,7 @@ def chunk_text(pages: List[Dict], chunk_size: int = CHUNK_SIZE, overlap: int = C
         text = page["text"]
         start = 0
 
-        # sliding window with overlap so we don't cut sentences mid-way
+        # Use a sliding window to create overlapping text segments
         while start < len(text):
             end = min(start + chunk_size, len(text))
             chunks.append({
@@ -56,3 +59,22 @@ def chunk_text(pages: List[Dict], chunk_size: int = CHUNK_SIZE, overlap: int = C
 
     logger.info(f"Created {len(chunks)} chunks from {len(pages)} pages")
     return chunks
+
+def process_and_store_document(file_content: bytes, filename: str, vector_store) -> int:
+    """Execute the document ingestion pipeline: extraction, chunking, embedding, and storage."""
+    pages = extract_text_from_pdf(file_content, filename)
+    if not pages:
+        return 0
+    
+    chunks = chunk_text(pages)
+    if not chunks:
+        return 0
+
+    texts = [c["text"] for c in chunks]
+    embeddings = embedding_model.generate_batch(texts)
+
+    success = vector_store.insert(embeddings, chunks)
+    if not success:
+        raise Exception("Failed to store chunks in Vector Store")
+
+    return len(chunks)

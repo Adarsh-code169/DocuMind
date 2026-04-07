@@ -9,7 +9,9 @@ services:
     env_file:
       - .env
     environment:
-      - ENDEE_HOST=endee.nstsdc.org
       - BACKEND_URL=http://localhost:8000
-    depends_on: []
+    volumes:
+      - .:/app
+      - ./backend/chroma_db:/app/backend/chroma_db
     restart: unless-stopped
+

@@ -14,27 +14,31 @@ st.markdown("""
 <style>
     /* main background */
     .stApp {
-        background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #16213e 100%);
+        background: #9BB4C0;
+        color: #703B3B;
+    }
+
+    /* Global text color override */
+    .stApp p, .stApp h1, .stApp h2, .stApp h3, .stApp span, .stApp label {
+        color: #703B3B !important;
     }
 
     /* sidebar */
     section[data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #1a1a2e 0%, #0f0f1a 100%);
-        border-right: 1px solid rgba(99, 102, 241, 0.2);
+        background: #8aa4b0;
+        border-right: 1px solid rgba(112, 59, 59, 0.2);
     }
 
     /* header styling */
     .main-title {
         font-size: 2.2rem;
         font-weight: 700;
-        background: linear-gradient(90deg, #818cf8, #a78bfa, #c084fc);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
+        color: #703B3B;
         margin-bottom: 0;
     }
     .sub-title {
         font-size: 1rem;
-        color: #94a3b8;
+        color: rgba(112, 59, 59, 0.8);
         margin-top: 0;
         margin-bottom: 2rem;
     }
@@ -42,15 +46,14 @@ st.markdown("""
     /* chat messages */
     .stChatMessage {
         border-radius: 12px;
-        border: 1px solid rgba(99, 102, 241, 0.1);
-        background: rgba(30, 30, 50, 0.5) !important;
-        backdrop-filter: blur(10px);
+        border: 1px solid rgba(112, 59, 59, 0.2);
+        background: rgba(255, 255, 255, 0.3) !important;
     }
 
     /* buttons */
     .stButton > button {
-        background: linear-gradient(135deg, #6366f1, #8b5cf6);
-        color: white;
+        background: #703B3B;
+        color: #FAFAFA99 !important;
         border: none;
         border-radius: 8px;
         padding: 0.5rem 1rem;
@@ -58,54 +61,51 @@ st.markdown("""
         transition: all 0.3s ease;
     }
     .stButton > button:hover {
-        background: linear-gradient(135deg, #818cf8, #a78bfa);
-        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
-        transform: translateY(-1px);
+        background: #8b4a4a;
+        box-shadow: 0 4px 15px rgba(112, 59, 59, 0.3);
     }
 
-    /* file uploader */
-    .stFileUploader {
-        border: 2px dashed rgba(99, 102, 241, 0.3);
-        border-radius: 10px;
-        padding: 1rem;
+    /* specific style for clear chat button in sidebar (the second/last button) */
+    section[data-testid="stSidebar"] .stButton:nth-last-of-type(1) button {
+        background: #FAFAFA !important;
+        color: #703B3B !important;
+        border: 1px solid rgba(112, 59, 59, 0.2) !important;
+    }
+    section[data-testid="stSidebar"] .stButton:nth-last-of-type(1) button:hover {
+        background: #ffffff !important;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
     }
 
     /* metrics */
     [data-testid="stMetricValue"] {
         font-size: 2rem;
-        color: #818cf8;
+        color: #703B3B !important;
     }
 
-    /* expander (sources) */
-    .streamlit-expanderHeader {
-        background: rgba(99, 102, 241, 0.1);
-        border-radius: 8px;
+    /* status badge overrides */
+    .status-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        display: inline-block;
+        margin-bottom: 1rem;
     }
-
-    /* chat input */
-    .stChatInput {
-        border-color: rgba(99, 102, 241, 0.3);
+    .status-online {
+        background: rgba(34, 197, 94, 0.2);
+        color: #166534 !important;
+        border: 1px solid rgba(34, 197, 94, 0.3);
     }
-
-    /* success/error messages */
-    .stSuccess {
-        background: rgba(34, 197, 94, 0.1);
-        border-left: 4px solid #22c55e;
-    }
-    .stError {
-        background: rgba(239, 68, 68, 0.1);
-        border-left: 4px solid #ef4444;
-    }
-
-    /* divider */
-    hr {
-        border-color: rgba(99, 102, 241, 0.15);
+    .status-offline {
+        background: rgba(239, 68, 68, 0.2);
+        color: #991b1b !important;
+        border: 1px solid rgba(239, 68, 68, 0.3);
     }
 
     /* welcome card */
     .welcome-card {
-        background: rgba(99, 102, 241, 0.08);
-        border: 1px solid rgba(99, 102, 241, 0.2);
+        background: rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(112, 59, 59, 0.2);
         border-radius: 12px;
         padding: 2rem;
         text-align: center;
@@ -113,31 +113,16 @@ st.markdown("""
         max-width: 600px;
     }
     .welcome-card h3 {
-        color: #c4b5fd;
+        color: #703B3B;
         margin-bottom: 1rem;
     }
     .welcome-card p {
-        color: #94a3b8;
+        color: rgba(112, 59, 59, 0.9);
         font-size: 0.95rem;
     }
 
-    /* status badge */
-    .status-badge {
-        display: inline-block;
-        padding: 4px 12px;
-        border-radius: 20px;
-        font-size: 0.8rem;
-        font-weight: 600;
-    }
-    .status-online {
-        background: rgba(34, 197, 94, 0.15);
-        color: #22c55e;
-        border: 1px solid rgba(34, 197, 94, 0.3);
-    }
-    .status-offline {
-        background: rgba(239, 68, 68, 0.15);
-        color: #ef4444;
-        border: 1px solid rgba(239, 68, 68, 0.3);
+    hr {
+        border-color: rgba(112, 59, 59, 0.15);
     }
 </style>
 """, unsafe_allow_html=True)
@@ -210,11 +195,11 @@ if "messages" not in st.session_state:
 if not st.session_state.messages:
     st.markdown("""
     <div class="welcome-card">
-        <h3>👋 Welcome!</h3>
-        <p>
-            Upload a research paper using the sidebar, then ask me anything about it.<br><br>
-            I'll search through the document semantically and give you answers with page-level citations.
-        </p>
+        <h3>📄 Ask Questions About Your Research Paper</h3>
+<p>
+    Upload a research paper using the sidebar and start asking questions.<br><br>
+    I'll scan the document and return answers along with the exact page citations.
+</p>
     </div>
     """, unsafe_allow_html=True)
 

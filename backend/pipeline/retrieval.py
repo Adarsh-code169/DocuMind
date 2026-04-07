@@ -2,6 +2,7 @@ import os
 import logging
 from groq import Groq
 from typing import List, Dict
+from embeddings import embedding_model
 
 logger = logging.getLogger(__name__)
 
@@ -10,25 +11,40 @@ LLM_TEMPERATURE = 0.3
 MAX_TOKENS = 1024
 
 
-class RAGPipeline:
-    """Takes user query + retrieved context and generates a grounded answer using Groq."""
+class RetrievalPipeline:
+    """Pipeline for handling querying, retrieval from the vector database, and answer generation."""
 
-    def __init__(self, api_key: str, model: str = None):
+    def __init__(self, api_key: str, vector_store, model: str = None):
         self.client = Groq(api_key=api_key)
         self.model = model or os.getenv("GROQ_MODEL", DEFAULT_MODEL)
-        logger.info(f"RAG pipeline using model: {self.model}")
+        self.vector_store = vector_store
+        logger.info(f"Retrieval pipeline using model: {self.model}")
+
+    def run(self, query: str, top_k: int = 5) -> Dict:
+        """Execute the retrieval pipeline."""
+        
+        # Generate embeddings for the query
+        query_vec = embedding_model.generate(query)
+        if not query_vec:
+            raise ValueError("Couldn't generate embeddings for the query.")
+            
+        # Retrieve document chunks relevant to the query
+        results = self.vector_store.search(query_vec, top_k=top_k)
+        
+        # Generate the response based on retrieved chunks
+        return self.generate_answer(query, results)
 
     def generate_answer(self, query: str, context: List[Dict]) -> Dict:
-        """Generate an answer based on retrieved document chunks."""
+        """Generate an answer using the provided context."""
 
-        # if endee returned nothing, don't bother calling the LLM
+        # Avoid calling the LLM if no context was found in the database
         if not context:
             return {
                 "answer": "I couldn't find relevant info in the uploaded documents. Try uploading a PDF on this topic first.",
                 "citations": []
             }
 
-        # format context with source labels so the LLM can cite them
+        # Format the context to include source references for citations
         context_str = "\n\n".join([
             f"Source [{i+1}]: {item['text']} (File: {item['metadata'].get('filename')}, Page: {item['metadata'].get('page_number')})"
             for i, item in enumerate(context)
@@ -57,3 +73,8 @@ class RAGPipeline:
         except Exception as e:
             logger.error(f"LLM call failed: {e}")
             return {"answer": "Sorry, something went wrong while generating the answer. Please try again.", "citations": []}
+
+def retrieve_and_generate_answer(query: str, vector_store, api_key: str, top_k: int = 5) -> Dict:
+    """Helper function to execute the retrieval and generation pipeline."""
+    pipeline = RetrievalPipeline(api_key=api_key, vector_store=vector_store)
+    return pipeline.run(query, top_k=top_k)

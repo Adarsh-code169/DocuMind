@@ -1,7 +1,0 @@
-HTTP/1.1 200 OK
-Content-Type: application/msgpack
-Content-Length: 22
-Server: Crow/master
-Connection: Keep-Alive
-
-‘–Ê=LÍr¡1Ätest Êø¢íà

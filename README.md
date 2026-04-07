@@ -1,12 +1,13 @@
-# Intelligent Research Assistant — RAG with Endee Vector Database
+# Intelligent Research Assistant — RAG with ChromaDB
 
-A RAG-based research assistant that lets you upload academic PDFs and ask questions about them. It uses **Endee** as the vector database for semantic search and **Llama 3.1** (via Groq) for generating answers with page-level citations.
+A RAG-based research assistant that lets you upload academic PDFs and ask questions about them. It uses **ChromaDB** as the persistent vector database for semantic search and **Llama 3.1** (via Groq) for generating answers with page-level citations.
 
 ---
 
 ## Demo
 
 🔗 Google Drive Demo: https://drive.google.com/file/d/11UGEhl7fCkm1TP3Kiatr184JePkf4LuU/view?usp=sharing
+
 ## Problem
 
 Searching through long academic papers manually is slow. Keyword search doesn't understand context or intent. This project uses semantic search + RAG to give you precise, cited answers from your documents.
@@ -20,30 +21,31 @@ User (Streamlit UI)
     │
     ├── Upload PDF ──→ FastAPI /upload
     │                      │
-    │                      ├── Extract text (pypdf)
-    │                      ├── Chunk text (500 chars, 50 overlap)
-    │                      ├── Generate embeddings (MiniLM)
-    │                      └── Store in Endee
+    │                      └── Ingestion Pipeline
+    │                              ├── Extract text (pypdf)
+    │                              ├── Chunk text (500 chars, 50 overlap)
+    │                              ├── Generate embeddings (MiniLM)
+    │                              └── Store in ChromaDB
     │
     └── Ask Question ──→ FastAPI /chat
                              │
-                             ├── Embed query (MiniLM)
-                             ├── Search Endee (top 5 similar chunks)
-                             └── Generate answer (Llama 3.1 via Groq)
-                                  └── Return answer + citations
+                             └── Retrieval Pipeline
+                                     ├── Embed query (MiniLM)
+                                     ├── Search ChromaDB (top 5 similar chunks)
+                                     └── Generate answer (Llama 3.1 via Groq)
+                                          └── Return answer + citations
 ```
 
 ---
 
-## How Endee is Used
+## How ChromaDB is Used
 
-Endee is the core vector database in this project. Here's what it does:
+ChromaDB is the core vector database in this project. Here's what it does:
 
-- **Stores** 384-dimensional embeddings for each document chunk
-- **Indexes** vectors with metadata (filename, page number, chunk ID)
-- **Searches** using cosine similarity to find the most relevant chunks for a query
-
-I chose Endee over alternatives like Chroma because of its C++ backend — it's fast and lightweight with a clean REST API, no heavy SDK needed.
+- **Stores** 384-dimensional embeddings for each document chunk.
+- **Indexes** vectors with metadata (filename, page number, chunk ID).
+- **Searches** using cosine similarity to find the most relevant chunks for a query.
+- **Persistence**: Data is saved locally in the `backend/chroma_db` directory, so it survives application restarts.
 
 ---
 
@@ -52,11 +54,12 @@ I chose Endee over alternatives like Chroma because of its C++ backend — it's 
 ```
 ├── backend/
 │   ├── main.py            # FastAPI app + routes
-│   ├── models.py          # request/response schemas
-│   ├── ingestion.py       # PDF extraction + chunking
-│   ├── embeddings.py      # sentence-transformers wrapper
-│   ├── vector_store.py    # Endee client
-│   └── rag.py             # RAG pipeline (context + LLM)
+│   ├── models.py          # Request/response schemas
+│   ├── embeddings.py      # Sentence-transformers utility
+│   ├── chroma_store.py    # ChromaDB client and persistence
+│   └── pipeline/          # Modularized RAG components
+│       ├── ingestion.py   # PDF extraction, chunking, and storage
+│       └── retrieval.py   # Query processing and answer generation
 ├── frontend/
 │   └── app.py             # Streamlit chat UI
 ├── Dockerfile
@@ -73,7 +76,7 @@ I chose Endee over alternatives like Chroma because of its C++ backend — it's 
 
 | Component | Tech |
 |-----------|------|
-| Vector DB | Endee |
+| Vector DB | ChromaDB |
 | LLM | Llama 3.1 8B (Groq) |
 | Embeddings | all-MiniLM-L6-v2 |
 | Backend | FastAPI |
@@ -89,16 +92,7 @@ I chose Endee over alternatives like Chroma because of its C++ backend — it's 
 - Python 3.9+
 - [Groq API key](https://console.groq.com/keys) (free)
 
-### 1. Start Endee
-
-```bash
-git clone https://github.com/EndeeLabs/endee
-cd endee
-./install.sh --release --avx2
-./run.sh
-```
-
-### 2. Clone this project
+### 1. Clone this project
 
 ```bash
 git clone <your-fork-url>
@@ -107,7 +101,7 @@ cp .env.example .env
 # edit .env and add your GROQ_API_KEY
 ```
 
-### 3. Run with Docker (recommended)
+### 2. Run with Docker (recommended)
 
 ```bash
 docker-compose up --build
@@ -115,21 +109,21 @@ docker-compose up --build
 
 This starts both the backend (port 8000) and frontend (port 8501).
 
-### 3b. Or run manually
+### 2b. Or run manually
 
 ```bash
 python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 
-# terminal 1
+# terminal 1 (Backend)
 uvicorn backend.main:app --reload --port 8000
 
-# terminal 2
+# terminal 2 (Frontend)
 streamlit run frontend/app.py
 ```
 
-### 4. Use it
+### 3. Use it
 
 1. Open `http://localhost:8501`
 2. Upload a PDF in the sidebar
@@ -141,15 +135,15 @@ streamlit run frontend/app.py
 
 | Endpoint | Method | What it does |
 |----------|--------|-------------|
-| `/upload` | POST | Upload + process a PDF |
-| `/chat` | POST | Ask a question, get answer + citations |
-| `/health` | GET | Health check |
+| `/upload` | POST | Upload and process a PDF |
+| `/chat` | POST | Ask a question, get formatted answer + citations |
+| `/health` | GET | Health check (reports vector store status) |
 
 ---
 
 ## Limitations
 
-- Only works with text-based PDFs (no OCR for scanned docs)
-- Single collection — all docs go in one place
-- Chat history resets on page reload
-- Best results with English text
+- Only works with text-based PDFs (no OCR for scanned docs).
+- Single collection — all documents are stored in the same index.
+- Chat history resets on page reload.
+- Optimized for English text processing.
