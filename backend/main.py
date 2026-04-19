@@ -57,8 +57,8 @@ app.add_middleware(
 
 from fastapi.responses import StreamingResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
-from pipeline.ingestion import process_and_store_document_stream
-from pipeline.retrieval import retrieve_and_generate_answer_stream
+from backend.pipeline.ingestion import process_and_store_document_stream
+from backend.pipeline.retrieval import retrieve_and_generate_answer_stream
 
 app.mount("/static", StaticFiles(directory=os.path.join(os.path.dirname(__file__), "static")), name="static")
 
