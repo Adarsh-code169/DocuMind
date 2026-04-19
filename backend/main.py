@@ -86,6 +86,30 @@ def health():
 async def status():
     return {"status": "online", "vector_store": "ready" if vector_store else "initializing"}
 
+@app.get("/documents")
+async def get_documents():
+    if not vector_store:
+        raise HTTPException(status_code=503, detail="Vector store not initialized")
+    return {"documents": vector_store.list_documents()}
+
+@app.delete("/documents/{filename}")
+async def delete_document(filename: str):
+    if not vector_store:
+        raise HTTPException(status_code=503, detail="Vector store not initialized")
+    success = vector_store.delete_document(filename)
+    if not success:
+        raise HTTPException(status_code=500, detail=f"Failed to delete {filename}")
+    return {"status": "deleted", "filename": filename}
+
+@app.post("/reset")
+async def reset_database():
+    if not vector_store:
+        raise HTTPException(status_code=503, detail="Vector store not initialized")
+    success = vector_store.reset_collection()
+    if not success:
+        raise HTTPException(status_code=500, detail="Failed to reset database")
+    return {"status": "reset", "message": "All documents cleared"}
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
