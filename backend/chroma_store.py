@@ -90,3 +90,48 @@ class ChromaVectorStore:
         except Exception as e:
             logger.error(f"Search request failed: {e}")
             return []
+
+    def list_documents(self) -> List[Dict]:
+        """List unique documents stored in the database."""
+        try:
+            results = self.collection.get(include=["metadatas"])
+            metadatas = results["metadatas"]
+            
+            docs = {}
+            for meta in metadatas:
+                fname = meta.get("filename")
+                if not fname: continue
+                if fname not in docs:
+                    docs[fname] = {
+                        "filename": fname,
+                        "chunk_count": 0,
+                        "page_count": 0
+                    }
+                docs[fname]["chunk_count"] += 1
+                docs[fname]["page_count"] = max(docs[fname]["page_count"], meta.get("page_number", 0))
+            
+            return list(docs.values())
+        except Exception as e:
+            logger.error(f"Failed to list documents: {e}")
+            return []
+
+    def delete_document(self, filename: str) -> bool:
+        """Delete all vectors associated with a specific document."""
+        try:
+            self.collection.delete(where={"filename": filename})
+            logger.info(f"Deleted document '{filename}' from collection")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to delete document '{filename}': {e}")
+            return False
+
+    def reset_collection(self) -> bool:
+        """Clear all data from the collection."""
+        try:
+            self.client.delete_collection(self.collection_name)
+            self.collection = self._ensure_collection()
+            logger.info("Collection reset complete")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to reset collection: {e}")
+            return False
