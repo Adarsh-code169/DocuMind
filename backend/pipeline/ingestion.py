@@ -4,7 +4,7 @@ from pypdf import PdfReader
 from typing import List, Dict
 
 # Use the existing embeddings model wrapper
-from embeddings import embedding_model
+from backend.embeddings import embedding_model
 
 logger = logging.getLogger(__name__)
 

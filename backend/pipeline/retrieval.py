@@ -2,7 +2,7 @@ import os
 import logging
 from groq import Groq
 from typing import List, Dict
-from embeddings import embedding_model
+from backend.embeddings import embedding_model
 
 logger = logging.getLogger(__name__)
 

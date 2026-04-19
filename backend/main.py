@@ -5,10 +5,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from dotenv import load_dotenv
 
-from models import ChatRequest, ChatResponse
-from chroma_store import ChromaVectorStore
-from pipeline.ingestion import process_and_store_document
-from pipeline.retrieval import RetrievalPipeline
+from backend.models import ChatRequest, ChatResponse
+from backend.chroma_store import ChromaVectorStore
+from backend.pipeline.ingestion import process_and_store_document
+from backend.pipeline.retrieval import RetrievalPipeline
 
 load_dotenv()
 
