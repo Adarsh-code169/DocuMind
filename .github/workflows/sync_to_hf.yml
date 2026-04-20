@@ -10,16 +10,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           lfs: true
 
       - name: Push to Hugging Face Spaces
-        env:
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
           git config --global user.email "github-actions@github.com"
           git config --global user.name "GitHub Actions"
-          git remote add hf https://Adrsh03:$HF_TOKEN@huggingface.co/spaces/Adrsh03/DocuMind
+          git remote add hf https://user:${{ secrets.HF_TOKEN }}@huggingface.co/spaces/Adrsh03/DocuMind
           git push hf main --force
