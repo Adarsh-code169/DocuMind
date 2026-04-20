@@ -19,5 +19,5 @@ jobs:
         run: |
           git config --global user.email "github-actions@github.com"
           git config --global user.name "GitHub Actions"
-          git remote add hf https://user:${{ secrets.HF_TOKEN }}@huggingface.co/spaces/Adrsh03/DocuMind
+          git remote add hf https://Adrsh03:${{ secrets.HF_TOKEN }}@huggingface.co/spaces/Adrsh03/DocuMind
           git push hf main --force
