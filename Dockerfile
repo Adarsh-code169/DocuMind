@@ -14,5 +14,5 @@ RUN chmod +x start.sh
 # Expose ports
 EXPOSE 8000 8501
 
-# Run the startup script
-CMD ["/app/start.sh"]
+# Run the application
+CMD ["sh", "-c", "uvicorn backend.main:app --host 0.0.0.0 --port ${PORT:-8000}"]

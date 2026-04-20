@@ -46,25 +46,32 @@ User (React UI)  <─── Served from Root (/) ───  FastAPI (Backend)
 | **Vector DB** | ChromaDB |
 | **Embeddings** | all-MiniLM-L6-v2 (sentence-transformers) |
 | **LLM** | Llama 3.1 8B/70B (via Groq) |
-| **Deployment** | Render (Primary) / Streamlit Cloud (Legacy) |
+| **Deployment** | Railway (Recommended) / Render / Streamlit Cloud |
 
 ---
 
 ## 🚀 Deployment (Keep the React UI)
 
-To deploy the **Full custom React experience**, we recommend **Render**:
+### Option 1: Railway (Recommended for Persistence) 🌟
+Railway allows for **Persistent Volumes**, meaning your uploaded documents will stay saved even after restarts.
 
-1.  **Fork** this repository.
-2.  Create a **New Web Service** on Render.
-3.  **Settings**:
-    *   **Runtime**: Python
-    *   **Build Command**: `pip install -r requirements.txt`
-    *   **Start Command**: `uvicorn backend.main:app --host 0.0.0.0 --port $PORT`
-4.  **Environment Variables**:
+1.  Create a **New Project** on Railway and connect your GitHub repo.
+2.  Add **Environment Variables**:
+    *   `GROQ_API_KEY`: (Your Key)
+3.  Add **Persistent Storage**:
+    *   Go to **Settings** -> **Volumes** -> **Add Volume**.
+    *   Set the **Mount Path** to `/app/backend/chroma_db`.
+
+### Option 2: Render
+1.  Create a **New Web Service** and connect your repo.
+2.  **Start Command**: `uvicorn backend.main:app --host 0.0.0.0 --port $PORT`
+3.  **Environment Variables**:
     *   `PYTHON_VERSION`: `3.11.9`
-    *   `GROQ_API_KEY`: (Your Groq API Key)
+    *   `GROQ_API_KEY`: (Your Key)
 
-*For the Streamlit Cloud version, use `app.py` as the main entry point.*
+*Note: On Render's free tier, documents are deleted when the server restarts.*
+
+---
 
 ---
 
