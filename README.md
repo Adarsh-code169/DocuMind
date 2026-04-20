@@ -1,3 +1,12 @@
+---
+title: DocuMind Knowledge Engine
+emoji: 🧠
+colorFrom: green
+colorTo: emerald
+sdk: docker
+app_port: 7860
+---
+
 # DocuMind Knowledge Engine 🧠
 
 DocuMind is an intelligent RAG (Retrieval-Augmented Generation) application designed to turn static academic papers and technical documents into conversational knowledge. It leverages **ChromaDB** for high-performance vector search and **Llama 3.1** (via Groq) for lightning-fast, cited answers.
@@ -46,21 +55,19 @@ User (React UI)  <─── Served from Root (/) ───  FastAPI (Backend)
 | **Vector DB** | ChromaDB |
 | **Embeddings** | all-MiniLM-L6-v2 (sentence-transformers) |
 | **LLM** | Llama 3.1 8B/70B (via Groq) |
-| **Deployment** | Railway (Recommended) / Render / Streamlit Cloud |
+| **Deployment** | Hugging Face Spaces (Free) / Render |
 
 ---
 
 ## 🚀 Deployment (Keep the React UI)
 
-### Option 1: Railway (Recommended for Persistence) 🌟
-Railway allows for **Persistent Volumes**, meaning your uploaded documents will stay saved even after restarts.
+### Option 1: Hugging Face Spaces (100% Free) 🌟
+This is the recommended way to host DocuMind for free.
 
-1.  Create a **New Project** on Railway and connect your GitHub repo.
-2.  Add **Environment Variables**:
-    *   `GROQ_API_KEY`: (Your Key)
-3.  Add **Persistent Storage**:
-    *   Go to **Settings** -> **Volumes** -> **Add Volume**.
-    *   Set the **Mount Path** to `/app/backend/chroma_db`.
+1.  Log in to [Hugging Face](https://huggingface.co/) and click **New Space**.
+2.  Select **Docker** as the SDK and choose the **Blank** template.
+3.  Once the Space is created, upload your files or connect your GitHub.
+4.  **Important**: Go to **Settings** -> **Variables and Secrets** and add your `GROQ_API_KEY`.
 
 ### Option 2: Render
 1.  Create a **New Web Service** and connect your repo.
@@ -69,7 +76,7 @@ Railway allows for **Persistent Volumes**, meaning your uploaded documents will 
     *   `PYTHON_VERSION`: `3.11.9`
     *   `GROQ_API_KEY`: (Your Key)
 
-*Note: On Render's free tier, documents are deleted when the server restarts.*
+*Note: On both free tiers, documents are deleted when the server restarts.*
 
 ---
 
