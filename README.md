@@ -1,12 +1,3 @@
----
-title: DocuMind Knowledge Engine
-emoji: 🧠
-colorFrom: green
-colorTo: emerald
-sdk: docker
-app_port: 7860
----
-
 # DocuMind Knowledge Engine 🧠
 
 DocuMind is an intelligent RAG (Retrieval-Augmented Generation) application designed to turn static academic papers and technical documents into conversational knowledge. It leverages **ChromaDB** for high-performance vector search and **Llama 3.1** (via Groq) for lightning-fast, cited answers.
