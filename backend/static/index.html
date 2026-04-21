@@ -336,10 +336,10 @@
                 setPipelineStatus("Researching Documents...");
 
                 try {
-                    const response = await fetch('/query', {
+                    const response = await fetch('/chat', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ question: userMsg })
+                        body: JSON.stringify({ message: userMsg })
                     });
                     
                     const reader = response.body.getReader();
