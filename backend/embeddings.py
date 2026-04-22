@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 # Use the same model via HF Inference API
 MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
-HF_API_URL = f"https://api-inference.huggingface.co/pipeline/feature-extraction/{MODEL_NAME}"
+HF_API_URL = f"https://router.huggingface.co/hf-inference/models/{MODEL_NAME}/pipeline/feature-extraction"
 
 class EmbeddingModel:
     """Utility class for generating text embeddings using Hugging Face Inference API."""
