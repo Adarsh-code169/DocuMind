@@ -46,30 +46,26 @@ User (React UI)  <─── Served from Root (/) ───  FastAPI (Backend)
 | **Vector DB** | ChromaDB |
 | **Embeddings** | all-MiniLM-L6-v2 (sentence-transformers) |
 | **LLM** | Llama 3.1 8B/70B (via Groq) |
-| **Deployment** | Hugging Face Spaces (Free) / Render |
+| **Deployment** | Render |
 
 ---
 
-## 🚀 Deployment (Keep the React UI)
+## 🚀 Deployment (Custom UI)
 
-### Option 1: Hugging Face Spaces (100% Free) 🌟
-This is the recommended way to host DocuMind for free.
+### Option 1: Render (Recommended)
+Render is the easiest way to host the DocuMind FastAPI backend and Custom UI.
 
-1.  Log in to [Hugging Face](https://huggingface.co/) and click **New Space**.
-2.  Select **Docker** as the SDK and choose the **Blank** template.
-3.  Once the Space is created, upload your files or connect your GitHub.
-4.  **Important**: Go to **Settings** -> **Variables and Secrets** and add your `GROQ_API_KEY`.
-
-### Option 2: Render
-1.  Create a **New Web Service** and connect your repo.
-2.  **Start Command**: `uvicorn backend.main:app --host 0.0.0.0 --port $PORT`
+1.  **Create a New Web Service**: Log in to [Render](https://render.com) and connect your GitHub repository.
+2.  **Configuration**:
+    *   **Runtime**: Python
+    *   **Build Command**: `pip install -r requirements.txt`
+    *   **Start Command**: `uvicorn backend.main:app --host 0.0.0.0 --port $PORT`
 3.  **Environment Variables**:
-    *   `PYTHON_VERSION`: `3.11.9`
-    *   `GROQ_API_KEY`: (Your Key)
+    *   Add `GROQ_API_KEY`: (Your Key from console.groq.com)
+    *   Add `PYTHON_VERSION`: `3.11.9`
 
-*Note: On both free tiers, documents are deleted when the server restarts.*
-
----
+> [!IMPORTANT]
+> On Render's Free tier, documents are deleted when the server restarts (ephemeral storage). For persistent storage, a paid "Persistent Disk" is required.
 
 ---
 
@@ -77,9 +73,9 @@ This is the recommended way to host DocuMind for free.
 
 1.  **Clone & Install**:
     ```bash
-    git clone https://github.com/adarsh-code169/DocuMind.git
+    git clone https://github.com/Adarsh-code169/DocuMind.git
     cd DocuMind
-    python -m venv venv
+    python3 -m venv venv
     source venv/bin/activate  # or venv\Scripts\activate on Windows
     pip install -r requirements.txt
     ```
@@ -92,9 +88,9 @@ This is the recommended way to host DocuMind for free.
 
 3.  **Run**:
     ```bash
-    uvicorn backend.main:app --reload
+    uvicorn backend.main:app --reload --port 9000
     ```
-    Open **`http://localhost:8000`** to see your app!
+    Open **`http://localhost:9000`** to see your app!
 
 ---
 
@@ -102,15 +98,14 @@ This is the recommended way to host DocuMind for free.
 
 ```
 ├── backend/
-│   ├── main.py            # FastAPI Entry Point
+│   ├── main.py            # FastAPI Entry Point (Custom UI)
 │   ├── models.py          # Pydantic Schemas
 │   ├── chroma_store.py    # ChromaDB Wrapper
 │   ├── pipeline/          # RAG Pipelines (Ingest/Retrieve)
-│   └── static/            # React Code (index.html, assets)
-├── app.py                 # Streamlit Backup Version
-├── requirements.txt       # Dependencies
-└── runtime.txt            # Python Version Meta
+│   └── static/            # Frontend (index.html, JS, CSS)
+├── render.yaml            # Render Blueprint for easy deployment
+├── requirements.txt       # Unified Dependencies
+└── streamlit_interface_backup.py  # Original Streamlit version (Backup)
 ```
 
 ---
-
